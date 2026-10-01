@@ -1,0 +1,40 @@
+<div class="user-bar">
+    <span>Осталось попыток: <strong id="attemptCount">1</strong></span>
+    <button onclick="buyAttempts()" style="background-color: #22c55e;">Купить 3 попытки (100 руб)</button>
+</div>
+
+<script>
+// Уникальный ID пользователя (для теста сохраняем в localStorage)
+let userId = localStorage.getItem('osint_user_id');
+if (!userId) {
+    userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('osint_user_id', userId);
+}
+
+// Загрузка статуса при старте
+async function loadStatus() {
+    const res = await fetch('/api/user_status', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: userId })
+    });
+    const data = await res.json();
+    document.getElementById('attemptCount').innerText = data.balance;
+}
+
+// Покупка попыток
+async function buyAttempts() {
+    const res = await fetch('/api/buy_attempts', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: userId })
+    });
+    const data = await res.json();
+    if(data.success) {
+        alert(data.message);
+        document.getElementById('attemptCount').innerText = data.new_balance;
+    }
+}
+
+loadStatus();
+</script>
