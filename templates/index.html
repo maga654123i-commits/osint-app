@@ -193,7 +193,7 @@
     </div>
 
     <div class="balance-card">
-        <div>Баланс: <span id="balance">...</span> попыток</div>
+        <div>Баланс: <span id="balance">...</span></div>
         <button class="btn-green" onclick="openModal()">Пополнить</button>
     </div>
 
@@ -233,7 +233,7 @@
             <b style="color: #38bdf8;">@OsintSearchPay_bot</b><br><br>
             После оплаты бот выдаст вам ключ доступа. Введите его ниже:
         </p>
-        <input type="text" id="promo-code" placeholder="Введите ключ (например, PROMO100)" style="margin-bottom: 15px;">
+        <input type="text" id="promo-code" placeholder="Введите ключ доступа" style="margin-bottom: 15px;">
         <button class="btn-primary" onclick="applyPromo()">Активировать</button>
         <button class="btn-green" style="background: #64748b; margin-top: 10px; width: 100%;" onclick="closeModal()">Закрыть</button>
     </div>
@@ -309,7 +309,7 @@
                 let linksHtml = value.map(url => `<a href="${url}" target="_blank">🔗 Открыть ссылку</a>`).join('<br>');
                 item.innerHTML = `<strong>${key}</strong>${linksHtml}`;
             } else if (typeof value === 'string' && value.startsWith('http')) {
-                item.innerHTML = `<strong>${key}</strong><a href="${value}" target="_blank">🔗 Перевернуть к источнику</a>`;
+                item.innerHTML = `<strong>${key}</strong><a href="${value}" target="_blank">🔗 Перейти к источнику</a>`;
             } else {
                 item.innerHTML = `<strong>${key}</strong><span>${value}</span>`;
             }
