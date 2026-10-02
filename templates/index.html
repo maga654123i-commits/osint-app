@@ -3,202 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSINT Intelligence Dashboard</title>
+    <title>OSINT Search Engine</title>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --btn-bg: #0284c7;
+            --btn-hover: #0369a1;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --success-color: #22c55e;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #0f172a;
-            color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: 15px;
+            display: flex;
+            justify-content: center;
         }
+
         .container {
+            width: 100%;
             max-width: 600px;
-            margin: 0 auto;
         }
-        h1 {
-            color: #38bdf8;
+
+        .header {
             text-align: center;
-            font-size: 24px;
             margin-bottom: 20px;
         }
-        .user-bar {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            color: var(--accent-color);
+        }
+
+        .balance-card {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #334155;
-        }
-        .search-box {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
             margin-bottom: 20px;
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
             border: 1px solid #334155;
         }
-        label {
-            font-size: 14px;
-            color: #94a3b8;
-            font-weight: 600;
+
+        .balance-card span {
+            font-weight: bold;
+            font-size: 16px;
         }
-        select, input, button {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-        }
-        button {
-            background-color: #0284c7;
-            cursor: pointer;
+
+        .btn-green {
+            background-color: var(--success-color);
+            color: white;
             border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
             font-weight: bold;
             transition: 0.2s;
         }
-        button:active {
-            transform: scale(0.98);
-        }
-        .btn-buy {
-            background-color: #22c55e;
-            padding: 8px 15px;
-            font-size: 14px;
-        }
-        .result-box {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 10px;
-            display: none;
+
+        .search-card, .result-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
             border: 1px solid #334155;
         }
-        pre {
-            background: #0f172a;
-            padding: 12px;
-            border-radius: 6px;
-            overflow-x: auto;
-            color: #4ade80;
-            white-space: pre-wrap;
-            word-break: break-all;
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
             font-size: 14px;
+            font-weight: 600;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: white;
+            font-size: 15px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--btn-bg);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .result-item {
+            background: #0f172a;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .result-item strong {
+            display: block;
+            color: var(--accent-color);
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .result-item span, .result-item a {
+            font-size: 15px;
+            color: #ffffff;
+            word-break: break-word;
+        }
+
+        .result-item a {
+            color: #38bdf8;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .btn-download {
+            background-color: #8b5cf6;
+            color: white;
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid #334155;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🔍 OSINT Search Engine</h1>
-
-    <div class="user-bar">
-        <span>Баланс: <strong id="attemptCount">...</strong> попыток</span>
-        <button class="btn-buy" onclick="buyAttempts()">Пополнить</button>
-    </div>
-    
-    <div class="search-box">
-        <label for="searchType">Категория поиска:</label>
-        <select id="searchType">
-            <option value="phone">📱 Контакты: Номер телефона / Email</option>
-            <option value="person">🧔 Личность: ФИО / Дата рождения</option>
-            <option value="auto">🚘 Транспорт: Госномер / VIN</option>
-            <option value="social">💬 Соцсети: VK / Instagram / TikTok</option>
-            <option value="telegram">✈️ Telegram: Username / ID</option>
-            <option value="docs">📄 Документы: Паспорт / ИНН / СНИЛС / ВУ</option>
-            <option value="property">🏠 Недвижимость: Адрес / Кадастровый №</option>
-            <option value="company">🏢 Юр. лицо: ИНН / ОГРН</option>
-            <option value="net">🌐 Онлайн-следы: IP / Домен</option>
-        </select>
-
-        <label for="queryInput">Запрос:</label>
-        <input type="text" id="queryInput" placeholder="Введите данные...">
-        <button onclick="performSearch()">Найти данные</button>
+    <div class="header">
+        <h1>🔎 OSINT Search Engine</h1>
     </div>
 
-    <div id="results" class="result-box">
-        <h3>Результат поиска:</h3>
-        <pre id="output">Загрузка...</pre>
+    <div class="balance-card">
+        <div>Баланс: <span id="balance">...</span> попыток</div>
+        <button class="btn-green" onclick="openModal()">Пополнить</button>
+    </div>
+
+    <div class="search-card">
+        <div class="form-group">
+            <label>Категория поиска:</label>
+            <select id="search-type">
+                <option value="person">👤 Личность (ФИО / Дата рождения)</option>
+                <option value="phone">📱 Номер телефона</option>
+                <option value="company">🏢 Компания / ИНН</option>
+                <option value="net">🌐 IP-адрес / Сеть</option>
+                <option value="social">💬 Соцсети / Никнейм</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Введите данные для поиска:</label>
+            <input type="text" id="query" placeholder="Например: Итченко Магжан Болатулы, 17.12.2007">
+        </div>
+
+        <button class="btn-primary" onclick="performSearch()">Найти данные</button>
+    </div>
+
+    <div class="result-card" id="result-box" style="display: none;">
+        <h3 style="margin-top: 0; color: var(--accent-color);">📋 Результат поиска:</h3>
+        <div id="result-content"></div>
+        <button class="btn-download" id="download-btn" onclick="downloadReport()">📥 Скачать полный отчёт (.txt)</button>
+    </div>
+</div>
+
+<!-- Модальное окно пополнения -->
+<div class="modal" id="payModal">
+    <div class="modal-content">
+        <h3>💳 Пополнение баланса</h3>
+        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">
+            Оплатите попытки Звёздами в нашем Telegram-боте:<br>
+            <b style="color: #38bdf8;">@OsintSearchPay_bot</b><br><br>
+            После оплаты бот выдаст вам ключ доступа. Введите его ниже:
+        </p>
+        <input type="text" id="promo-code" placeholder="Введите ключ (например, PROMO100)" style="margin-bottom: 15px;">
+        <button class="btn-primary" onclick="applyPromo()">Активировать</button>
+        <button class="btn-green" style="background: #64748b; margin-top: 10px; width: 100%;" onclick="closeModal()">Закрыть</button>
     </div>
 </div>
 
 <script>
-let userId = localStorage.getItem('osint_user_id');
-if (!userId) {
-    userId = 'user_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('osint_user_id', userId);
-}
-
-async function loadStatus() {
-    try {
-        const res = await fetch('/api/user_status', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ user_id: userId })
-        });
-        const data = await res.json();
-        document.getElementById('attemptCount').innerText = data.balance;
-    } catch(e) {
-        document.getElementById('attemptCount').innerText = 'Ошибка';
-    }
-}
-
-async function performSearch() {
-    const type = document.getElementById('searchType').value;
-    const query = document.getElementById('queryInput').value.trim();
-    const resultsBox = document.getElementById('results');
-    const output = document.getElementById('output');
-
-    if (!query) {
-        alert("Введите значение для поиска");
-        return;
+    let currentUserId = localStorage.getItem('osint_user_id');
+    if (!currentUserId) {
+        currentUserId = 'user_' + Math.random().toString(36).substring(2, 10);
+        localStorage.setItem('osint_user_id', currentUserId);
     }
 
-    resultsBox.style.display = 'block';
-    output.innerText = 'Поиск по базам данных...';
+    let lastSearchData = null;
 
-    try {
-        const response = await fetch('/api/search', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, type, query })
-        });
-
-        const result = await response.json();
-        if (response.ok && result.success) {
-            output.innerText = JSON.stringify(result.data, null, 4);
-            if (result.remaining_attempts !== undefined) {
-                document.getElementById('attemptCount').innerText = result.remaining_attempts;
-            }
-        } else {
-            output.innerText = 'Ошибка: ' + (result.error || 'Неизвестная ошибка');
+    async function loadBalance() {
+        try {
+            const res = await fetch('/api/user_status', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({user_id: currentUserId})
+            });
+            const data = await res.json();
+            document.getElementById('balance').innerText = data.balance;
+        } catch(e) {
+            document.getElementById('balance').innerText = 'Ошибка';
         }
-    } catch (e) {
-        output.innerText = 'Ошибка соединения с сервером.';
     }
-}
 
-async function buyAttempts() {
-    try {
+    async function performSearch() {
+        const type = document.getElementById('search-type').value;
+        const query = document.getElementById('query').value.trim();
+        if (!query) {
+            alert('Пожалуйста, введите данные для поиска!');
+            return;
+        }
+
+        const box = document.getElementById('result-box');
+        const content = document.getElementById('result-content');
+        box.style.display = 'block';
+        content.innerHTML = '<p style="color: #94a3b8;">Поиск информации в реестрах...</p>';
+
+        try {
+            const res = await fetch('/api/search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({user_id: currentUserId, type: type, query: query})
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                content.innerHTML = `<p style="color: #ef4444;">${data.error || 'Произошла ошибка'}</p>`;
+                return;
+            }
+
+            loadBalance();
+            lastSearchData = data.data;
+            renderResult(data.data);
+        } catch(e) {
+            content.innerHTML = '<p style="color: #ef4444;">Ошибка соединения с сервером</p>';
+        }
+    }
+
+    function renderResult(data) {
+        const content = document.getElementById('result-content');
+        const downloadBtn = document.getElementById('download-btn');
+        content.innerHTML = '';
+
+        for (const [key, value] of Object.entries(data)) {
+            const item = document.createElement('div');
+            item.className = 'result-item';
+
+            if (Array.isArray(value)) {
+                let linksHtml = value.map(url => `<a href="${url}" target="_blank">🔗 Открыть ссылку</a>`).join('<br>');
+                item.innerHTML = `<strong>${key}</strong>${linksHtml}`;
+            } else if (typeof value === 'string' && value.startsWith('http')) {
+                item.innerHTML = `<strong>${key}</strong><a href="${value}" target="_blank">🔗 Перевернуть к источнику</a>`;
+            } else {
+                item.innerHTML = `<strong>${key}</strong><span>${value}</span>`;
+            }
+            content.appendChild(item);
+        }
+
+        downloadBtn.style.display = 'block';
+    }
+
+    function downloadReport() {
+        if (!lastSearchData) return;
+
+        let reportText = "========================================\n";
+        reportText += "      ОТЧЁТ ПОИСКА ЧЕЛОВЕКА / ДАННЫХ     \n";
+        reportText += "========================================\n\n";
+
+        for (const [key, value] of Object.entries(lastSearchData)) {
+            if (Array.isArray(value)) {
+                reportText += `${key}:\n` + value.map(v => `   - ${v}`).join('\n') + "\n\n";
+            } else {
+                reportText += `${key}: ${value}\n\n`;
+            }
+        }
+
+        reportText += "----------------------------------------\n";
+        reportText += "Отчёт сгенерирован автоматически.\n";
+
+        const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `OSINT_Report_${Date.now()}.txt`;
+        a.click();
+    }
+
+    function openModal() { document.getElementById('payModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('payModal').style.display = 'none'; }
+
+    async function applyPromo() {
+        const code = document.getElementById('promo-code').value.trim();
+        if (!code) {
+            alert("Введите код!");
+            return;
+        }
+
         const res = await fetch('/api/buy_attempts', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ user_id: userId })
+            body: JSON.stringify({user_id: currentUserId, code: code})
         });
-        const data = await res.json();
-        if(data.success) {
-            alert(data.message);
-            document.getElementById('attemptCount').innerText = data.new_balance;
-        }
-    } catch(e) {
-        alert('Ошибка при оформлении');
-    }
-}
 
-loadStatus();
+        const data = await res.json();
+        if (data.success) {
+            alert(data.message);
+            loadBalance();
+            closeModal();
+        } else {
+            alert(data.error);
+        }
+    }
+
+    loadBalance();
 </script>
 
 </body>
