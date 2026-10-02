@@ -8,8 +8,13 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice, PreCheckoutQuery
 
+# ==========================================
+# 1. ИНИЦИАЛИЗАЦИЯ И НАСТРОЙКА ПРИЛОЖЕНИЯ
+# ==========================================
+
 app = Flask(__name__)
 
+# Токен Telegram-бота
 BOT_TOKEN = "8970932287:AAEvRQHEVqHHFyeQlXRPS6GvbLA6hkUlXME"
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -35,6 +40,7 @@ def init_db():
 init_db()
 
 def get_kz_operator(phone):
+    """Определение оператора Казахстана по коду номера"""
     digits = re.sub(r'\D', '', phone)
     if len(digits) == 11 and digits.startswith('7'):
         code = digits[1:4]
@@ -43,8 +49,12 @@ def get_kz_operator(phone):
             '705': 'Beeline', '771': 'Beeline', '776': 'Beeline', '777': 'Beeline',
             '707': 'Tele2 / Altel', '708': 'Tele2 / Altel', '747': 'Tele2 / Altel', '700': 'Tele2 / Altel'
         }
-        return operators.get(code, "Казахстан (Неизвестный оператор)")
-    return "Неизвестный регион/оператор"
+        return operators.get(code, "Казахстан (Оператор не определён)")
+    return "Международный / Неизвестный номер"
+
+# ==========================================
+# 2. МАРШРУТЫ И API ДЛЯ ВЕБ-САЙТА (FLASK)
+# ==========================================
 
 @app.route('/')
 def index():
@@ -54,6 +64,7 @@ def index():
 def user_status():
     data = request.json or {}
     user_id = data.get('user_id')
+    
     if not user_id:
         return jsonify({'error': 'No user_id provided'}), 400
 
@@ -66,6 +77,7 @@ def user_status():
         attempts = 1
     else:
         attempts = user['attempts']
+
     conn.close()
     
     balance_display = "∞ (Админ)" if attempts >= 999999 else attempts
@@ -99,32 +111,40 @@ def search():
     clean_query = query.strip()
 
     if search_type == 'phone':
-        phone_digits = ''.join(filter(str.isdigit, clean_query))
+        phone_digits = re.sub(r'\D', '', clean_query)
         operator = get_kz_operator(clean_query)
         
         result_data = {
             "ТИП ЗАПРОСА": "Расширенный OSINT поиск по номеру",
             "ИСХОДНЫЙ НОМЕР": clean_query,
-            "ОПЕРАТОР И РЕГИОН": operator,
-            "ВОЗМОЖНЫЕ ТЕГИ / ИМЕНА (ОТКРЫТЫЕ ИСТОЧНИКИ)": [
-                "Клиент Kaspi / Jusan",
-                "Запись в WhatsApp / Telegram",
-                "Найдены совпадения в объявлениях Olx.kz"
+            "ОПЕРАТОР СВЯЗИ": operator,
+            "ВОЗМОЖНЫЕ ИМЕНА И ТЕГИ": [
+                f"Клиент банка (Kaspi / Jusan)",
+                f"Владелец объявления на Olx.kz",
+                f"Пользователь мессенджеров (WhatsApp / Telegram)"
             ],
-            "ПРОВЕРКА В РЕЕСТРАХ НАЛОГОПЛАТЕЛЬЩИКОВ (РК)": f"https://kgd.gov.kz/ru/services/taxpayer_search",
+            "ПРОВЕРКА В GOOGLE": f"https://www.google.com/search?q=%22{phone_digits}%22",
+            "ПРОВЕРКА В ЯНДЕКС": f"https://yandex.ru/search/?text={phone_digits}",
+            "ПРОВЕРКА В РЕЕСТРАХ НАЛОГОПЛАТЕЛЬЩИКОВ (РК)": "https://kgd.gov.kz/ru/services/taxpayer_search",
             "ПРОВЕРКА В WHATSAPP": f"https://wa.me/{phone_digits}",
             "ПРОВЕРКА В TELEGRAM": f"https://t.me/+{phone_digits}",
-            "ПОИСК СОВПАДЕНИЙ В GOOGLE": [
-                f"https://www.google.com/search?q=%22{phone_digits}%22",
-                f"https://www.google.com/search?q=%22{clean_query}%22"
-            ],
-            "СТАТУС": "Данные успешно обработаны"
+            "СТАТУС": "Данные успешно сформированы"
+        }
+    elif search_type == 'person':
+        result_data = {
+            "ТИП ЗАПРОСА": "Поиск физического лица (ФИО)",
+            "ЗАПРОС": clean_query,
+            "ПОИСК ВКОНТАКТЕ": f"https://vk.com/search?c%5Bq%5D={clean_query}&c%5Bsection%5D=people",
+            "ПОИСК В GOOGLE": f"https://www.google.com/search?q=%22{clean_query}%22",
+            "ПРОВЕРКА В КГД МФ РК (ИИН / НАЛОГИ)": "https://kgd.gov.kz/ru/services/taxpayer_search",
+            "СТАТУС": "Данные успешно сформированы"
         }
     else:
         result_data = {
-            "ТИП ЗАПРОСА": f"Поиск ({search_type})",
+            "ТИП ЗАПРОСА": f"Общий поиск ({search_type})",
             "ЗАПРОС": clean_query,
-            "ПОИСК В GOOGLE": [f"https://www.google.com/search?q={clean_query}"],
+            "ПОИСК В GOOGLE": f"https://www.google.com/search?q={clean_query}",
+            "ПОИСК В ЯНДЕКС": f"https://yandex.ru/search/?text={clean_query}",
             "СТАТУС": "Данные успешно сформированы"
         }
 
@@ -163,7 +183,7 @@ def buy_attempts():
         return jsonify({'success': False, 'error': 'Неверный ключ доступа или промокод.'})
 
 # ==========================================
-# TELEGRAM BOT & SERVER RUNNER
+# 3. ЛОГИКА TELEGRAM-БОТА И ЗАПУСК
 # ==========================================
 
 @dp.message(Command("start"))
